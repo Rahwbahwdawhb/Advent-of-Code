@@ -1,0 +1,5 @@
+setup.py
+AOC_2022.egg-info/PKG-INFO
+AOC_2022.egg-info/SOURCES.txt
+AOC_2022.egg-info/dependency_links.txt
+AOC_2022.egg-info/top_level.txt
