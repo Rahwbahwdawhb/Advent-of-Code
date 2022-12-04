@@ -34,6 +34,7 @@ for row in inpList:
 print('1st: ',prioSumTot)
 
 #2nd problem
+#unnecessary logic below, could have just looped through list with increments of 3 and checked items in groups of 3 on every iteration, also no need to loop with the list that has the most number of elements since common means that one item should be in both others..
 # print(len(inpList),inpList[0],':',inpList[-1])
 rowIter=0
 currentGroup=[]
