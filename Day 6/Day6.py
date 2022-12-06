@@ -14,10 +14,10 @@ iter=0
 for subStr in subStrs:
     # print(subStr)
     uChars=''.join(set(subStr))
-    if len(uChars)==4:
+    if len(uChars)==n:
         break
     iter+=1
-print('1st: ',iter+4)
+print('1st: ',iter+n)
 
 #2nd problem
 n=14
@@ -26,8 +26,8 @@ iter=0
 for subStr in subStrs:
     # print(subStr)
     uChars=''.join(set(subStr))
-    if len(uChars)==14:
+    if len(uChars)==n:
         break
     iter+=1
-print('2nd: ',iter+14)
+print('2nd: ',iter+n)
 
