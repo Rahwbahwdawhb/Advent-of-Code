@@ -1,7 +1,7 @@
 from preload import input
 # print(input)
 
-# input=open('ex.txt').read()
+input=open('ex.txt').read()
 
 #1st problem
 inpList=input.split('Monkey')
@@ -75,13 +75,13 @@ class monkey2:
         while len(self.items)!=0:
             old=self.items.pop(0)
             new=eval(self.operation)
-            # if new%9699690==0:
-            #     new=new/9699690
+            if new>9699690:
+                new=new//9699690+new%9699690
             self.itemsChecked+=1
-            divList=[2,7,3,11,17,5,13,19]
-            for d in divList:
-                if new%d==0:
-                    new=new//d
+            # divList=[2,7,3,11,17,5,13,19]
+            # for d in divList:
+            #     if new%d==0:
+            #         new=new//d+new%d
             if new%self.testDIV==0:
                 self.monkeyList[self.throwMonkeyTrue].getItem(new)
             else:
