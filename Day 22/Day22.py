@@ -5,7 +5,7 @@ input=open('ex.txt').read()
 # print(input)
 boardStr,pathStr=input.split('\n\n')
 # print(boardStr,pathStr)
-
+ 
 
 #1st problem
 board=[]
