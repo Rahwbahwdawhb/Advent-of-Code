@@ -1,0 +1,7 @@
+https://stackoverflow.com/questions/1054271/how-to-import-a-python-class-that-is-in-a-directory-above
+answer by ThorSummoner
+
+to make it work, start a command prompt in this folder and write:
+C:\...\AOC-2022\AOC-2022\aocVENV\Scripts\python.exe -m pip install --editable ./
+and press enter
+... is the full file path to this folder
