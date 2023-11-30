@@ -1,0 +1,4 @@
+-e git+https://github.com/Rahwbahwdawhb/AOC-2022.git@11b75f868fc4f05e3fe3b96133ba1719a530fe06#egg=AOC_2022&subdirectory=aoc-2022
+mpmath==1.2.1
+numpy==1.23.5
+sympy==1.11.1
