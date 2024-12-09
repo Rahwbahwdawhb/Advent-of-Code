@@ -1,7 +1,7 @@
 import os
 os.chdir(os.path.dirname(__file__))
-# file='input.txt'
-file='example.txt'
+file='input.txt'
+# file='example.txt'
 with open(file) as f:
     data=f.read().strip()
 idList=[]
@@ -88,26 +88,24 @@ movedIds=[]
 nonMovedRanges=[]
 nonMovedIds=[]
 maxSpace=max(spaceDict.keys())
-while occupiedSlots:
+while occupiedSlots: #since spaces are allowed, keep moving files until all of them have been checked if they can be moved (no break for this while loop)
     oSlot=occupiedSlots.pop()
     oSlotRange=occupiedRanges.pop()
     oId=occupiedIds.pop()
     minIndex=currentIndex
     moveKey=None
-    if oSlot>maxSpace:
-        minIndex+=1
-    for key in range(oSlot,maxSpace+1):
+    for key in range(oSlot,maxSpace+1): #files can be moved to spaces that are at least as long (or longer) than their block count
         try:
             leftmostSpace=spaceDict[key][0]
             if leftmostSpace[0]<minIndex:
                 minIndex=leftmostSpace[0]
                 moveKey=key
-        except:
+        except: #if the index range for the given key (number of blocks)
             pass
     if minIndex<oSlotRange[0]:
         if moveKey:
-            moveIndices=spaceDict[moveKey].pop(0)
-            if len(moveIndices)>oSlot:
+            moveIndices=spaceDict[moveKey].pop(0) #remove the block range from the spaceDict that will be used
+            if len(moveIndices)>oSlot: #if the removed range is longer than the blocks to be moved, put the unused space indices into spaceDict (with key=length of unused space)
                 indicesLeft=moveIndices[oSlot:]
                 moveIndices=moveIndices[:oSlot]
                 N=len(indicesLeft)
@@ -117,13 +115,13 @@ while occupiedSlots:
                         if indicesLeft[0]<s[0]:
                             stoppedBool=True
                             break
-                    if stoppedBool:
+                    if stoppedBool: #insert the range such that the index ranges in spaceDict increases from left to right
                         spaceDict[N].insert(i,indicesLeft)
                     else:
                         spaceDict[N].append(indicesLeft)
                 except:
                     spaceDict[N]=[indicesLeft]
-                #move
+            #move
             movedRanges.append(moveIndices)
             movedIds.append(oId)
     else:
