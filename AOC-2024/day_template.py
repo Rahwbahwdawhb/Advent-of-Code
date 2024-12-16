@@ -2,4 +2,4 @@ import os
 os.chdir(os.path.dirname(__file__))
 file='input.txt'
 with open(file) as f:
-    dataList=f.read().strip().split('\n')
+    data_list=f.read().strip().split('\n')
