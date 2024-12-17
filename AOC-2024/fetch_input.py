@@ -6,7 +6,7 @@
 # This will create a subfolder called "Day day_date" and add a file called input.txt to this folder.
 # NOTE: this assumes that the name of the folder containing this file ends with -YEAR, e.g. -2024
 
-day_date=16
+day_date=17
 
 def fetch_function():
     year=os.getcwd().split('-')[-1]    
@@ -14,7 +14,7 @@ def fetch_function():
     directory_items=os.listdir()
     if day_folder_name not in directory_items:
         os.mkdir(day_folder_name)
-        shutil.copyfile('dayTemplate.py',os.path.join(day_folder_name,f'Day{day_date}.py'))
+        shutil.copyfile('day_template.py',os.path.join(day_folder_name,f'Day{day_date}.py'))
     try:
         with open(os.path.join(day_folder_name,'input.txt')) as f:
             if len(f.read())==0:
