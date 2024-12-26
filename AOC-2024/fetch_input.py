@@ -6,7 +6,7 @@
 # This will create a subfolder called "Day day_date" and add a file called input.txt to this folder.
 # NOTE: this assumes that the name of the folder containing this file ends with -YEAR, e.g. -2024
 
-day_date=18
+day_date=25
 
 def fetch_function():
     year=os.getcwd().split('-')[-1]    
