@@ -1,61 +1,32 @@
 import os
 os.chdir(os.path.dirname(__file__))
 file='input.txt'
-file='example.txt'
+# file='example.txt'
 with open(file) as f:
     available_towel_str,designs_str=f.read().strip().split('\n\n')
 
-# # available_towel_set={at.strip() for at in available_towel_str.split(',')}
-# available_towels=[at.strip() for at in available_towel_str.split(',')]
-# available_towels.sort(key=len,reverse=True)
-
-# available_towel_set=set()
-# available_towel_lens=set()
-# for at in available_towel_str.split(','):
-#     at=at.strip()
-#     available_towel_set.add(at)
-#     available_towel_lens.add(len(at))
-# available_towel_lens=list(available_towel_lens)
-# available_towel_lens.sort()
-
-# possible_designs=0
-# for design in designs_str.split('\n'):
-#     towel_check_0=design.strip()
-#     # towel_check=towel_check_0
-#     # for towel in available_towels:
-#     #     towel_check=towel_check.replace(towel,'')
-#     #     if len(towel_check)==0:
-#     #         possible_designs+=1
-#     #         break
-    
-#     1
-#     # print(towel_check_0,possible_designs)
-#     # 1
-# print(possible_designs)
-
-towel_design_dict=dict()
-towel_design_set_0=set()
+towel_design_dict=dict() #keep track of designs that can be done, keys=towel designs and values=bool
+base_towel_dict=dict() #for 2nd part, keys=first letter of available towel string values=available towel strings starting with the first letter specified by the key
 for at in available_towel_str.split(','):
     towel_design_dict[at.strip()]=True
-    towel_design_set_0.add(at.strip())
-
-possible_combinations_dict=dict()
+    at=at.strip()
+    try:
+        base_towel_dict[at[0]].add(at)
+    except:
+        base_towel_dict[at[0]]={at}
+#recursively check snippets (one from the left and one from the right, one at a time) of the towel string that grow in length
+#check if the snippet is in the base_towel_dict, if so return its associated bool
+#if not, split the snippet further and check the new snippets recursively
+#ultimately one gets down to snippets with lengths of 1 and if these are not in the base_towel_dict they and the designs they are part of cannot be made so return false
+#update base_towel_dict with the returned bools for each towel string that is investigated (since done recursively, this will also be made for snippets)
 def recursive_check(towel_str):
     try:
         return towel_design_dict[towel_str]
     except:
         N=len(towel_str)
-        if N==1 or N==0:
+        if N==1:
             return False
-        elif N==2:
-            check1=recursive_check(towel_str[0])
-            check2=recursive_check(towel_str[1])
-            # if check1 and check2:
-            #     possible_combinations_dict[towel_str]={f"{towel_str[0]},{towel_str[1]}"}
-            return check1 and check2
         possible_design_bool=False
-        # possible_combinations=set()
-        possible_combinations=0
         for i in range(len(towel_str)-1):
             towel_str_1=towel_str[:i+1]
             towel_str_2=towel_str[i+1:]
@@ -68,39 +39,46 @@ def recursive_check(towel_str):
             towel_design_dict[towel_str_2]=check2
             if check1 and check2:
                 possible_design_bool=True
-                possible_combinations+=1
-        #         if towel_str_1 in towel_design_set_0 and towel_str_2 in towel_design_set_0:
-        #             possible_combinations.add(f"{towel_str_1},{towel_str_2}")
-        #         elif (towel_str_1 in towel_design_set_0 and not towel_str_2 in towel_design_set_0):
-        #             for combination in possible_combinations_dict[towel_str_2]:
-        #                 possible_combinations.add(f"{towel_str_1},{combination}")
-        #         elif (towel_str_1 not in towel_design_set_0 and towel_str_2 in towel_design_set_0):
-        #             for combination in possible_combinations_dict[towel_str_1]:
-        #                 possible_combinations.add(f"{combination},{towel_str_2}")
-        #         else:
-        #             for combination_2 in possible_combinations_dict[towel_str_2]:
-        #                 for combination_1 in possible_combinations_dict[towel_str_1]:
-        #                     possible_combinations.add(f"{combination_1},{combination_2}")
-        #         # break
-        possible_combinations_dict[towel_str]=possible_combinations
         return possible_design_bool
 
-possible_designs=0
-combinations=0
-N_loop=len(designs_str.split('\n'))
-for iter,design in enumerate(designs_str.split('\n')):
-    # print(f"{iter}/{N_loop}")
-    possible_designs+=recursive_check(design)
-    combinations+=possible_combinations_dict[design]
-    print(possible_combinations_dict[design])
-    1
-print(possible_designs)
-print(combinations)
+possible_designs=0 #answer to part 1
+possible_combinations=0 #answer to part 2
+for design in designs_str.split('\n'):
+    design_bool=recursive_check(design)
+    possible_designs+=design_bool
+    #part 2
+    #for designs that are possible, start from the left of the string and check the base towel designs (in base_towel_dict) that can match
+    #the string from the leftmost character onwards, for each onward match, add 1 to an index counter (one slot for each index of the towel design string +one extra, *commented below)
+    #at an index that represents stepping the full length from the start character until after the full matching base towel design
+    #go to the next position in the string and repeat this procedure IF the count at the index counter for the 2nd character (=1) is not 0
+    #for each base towel design that matches now add the number in the current counter index slot to the counter index slot that matches stepping past the full length of the matching base towel design
+    #if some base design would extend past the last index of the counter array, ignore it and try the next one
+    #after the design towel string has been looped through, the number of possible combinations will be found in the last index slot of the counter array -so add this number to the sum total
+    
+    #*it was important to add 1 extra slot in the counter array because when stepping past the full length of the matching base towel string one ends up 1 index past the length of the towel design string!
+    #if one just pushes these values back to the index slot in the counter array that matches the last index, then these counts will overlap the counts that represents steps that made it to the second last character!
+    #-which will in general produce a summation that is incorrect (too large) unless there was a base towel string with a single character that matches that last step!
 
-#varje ok-kombination utgörs av ett par av strängar => bildar 2-grenande träd
-#då använder nod högt upp i träd kommer ha använt alla kombinationer i noder nedanför
-#om trackar vilka nedre noder som används bör kunna undvika att de räknas flera ggr
-#måste köra från aktuellt index och vidare / från 0 till aktuellt index, för noder
-#ska kunna användas på olika ställen i sträng -men ej flera ggr i följd på samma ställe
-#vill ha m siffra för kombinationer av underliggande noder då lägger till ny
-#noden själv + samtliga underliggande ska deaktiveras/ej räknas om använder samma nod igen
+    #initially found all base towel strings that were used to match the design towel string (a subset of the base towel strings) and set up unique dictionaries for each design towel string to check combinations for
+    #this setting up of new dictionaries proved much slower than just using a single dictionary with all base towel strings
+    if design_bool:
+        N_design=len(design)
+        combination_counter=[0 for _ in range(N_design+1)] #*adding an extra slot to only count the steps that made it all the way to the end
+        combination_counter[0]=1
+        i=0
+        while i<N_design:
+            try:
+                potential_base_designs_full=base_towel_dict[design[i]]
+                for base_design in potential_base_designs_full:
+                    N_bd=len(base_design)
+                    try:
+                        if design[i:i+N_bd]==base_design:
+                            combination_counter[i+N_bd]+=combination_counter[i]
+                    except:
+                        pass
+            except:
+                pass
+            i+=1
+        possible_combinations+=combination_counter[-1]
+print('1st:',possible_designs)
+print('2nd:',possible_combinations)
