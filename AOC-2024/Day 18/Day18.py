@@ -25,22 +25,36 @@ def get_grid(bytes_to_fall):
     return grid
 def check_grid(grid):
     position_queue=[(0,0,0)]
-    visited_positions={(0,0)}
+    visited_positions=set()
+    # visited_positions={(0,0)} #with 1st Dijkstra version, it can be initiated like this to not risk visiting starting node again..but with 2nd it has to be initiated as above
     finished=False
     while position_queue:
         steps,y,x=position_queue.pop(0)        
         if (y,x)==(row_max,col_max):
             finished=True
             break
+        #1st version of Dijkstra, add to visited when adding to the queue and let each popped position enter the loop
         for dy,dx in directions:
             y_new=y+dy
             x_new=x+dx
-            if 0<=y_new<=row_max and 0<=x_new<=col_max and (y_new,x_new) not in visited_positions and (y_new,x_new):
+            if 0<=y_new<=row_max and 0<=x_new<=col_max and (y_new,x_new) not in visited_positions:
                 if grid[y_new][x_new]!='#':
                     insort(position_queue,(steps+1,y_new,x_new))
                     #in Dijkstra used for day 16, the line below was not used (but it does solve correctly when adding it as well), visited_positions was instead added to when a new iteration of the while loop was started. In this problem, this does not work because one gets stuck in areas without any obstacles -probably because the same position is added multiple times since they go further down in the queue
                     #this does however prevent the same position from being added to the queue multiple times
+                    #Day 16 was a mix of this and the one below, which does not work well for grids with lots of open grounds -better to stick with one of these!
                     visited_positions.add((y_new,x_new))
+        #2nd version of Dijkstra, add to visited nodes after pop and don't let all popped values enter the loop
+        #the importance seems to be to add to visited nodes just after the check to visited nodes has been made!
+        #this avoids the issues of letting the same points add themselves to the queue over and over as mentioned above...
+        # if (y,x) not in visited_positions:
+        #     visited_positions.add((y,x))
+        #     for dy,dx in directions:
+        #         y_new=y+dy
+        #         x_new=x+dx
+        #         if 0<=y_new<=row_max and 0<=x_new<=col_max:
+        #             if grid[y_new][x_new]!='#':
+        #                 insort(position_queue,(steps+1,y_new,x_new))
     return steps,finished
 
 #part 1

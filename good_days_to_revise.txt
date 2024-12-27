@@ -1,1 +1,3 @@
 Counting unique combinations of synthesizing string from base strings: 2024 Day 19 part 2
+
+Different implementations of Dijkstra: 2024 Day 18
