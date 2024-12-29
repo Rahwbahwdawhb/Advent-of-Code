@@ -36,20 +36,19 @@ def get_movement_dict(keypad):
     for i0,key_row in enumerate(keypad):
         for i1,start_key in enumerate(key_row):
             if start_key:
-                for i2,key_row_2 in enumerate(keypad):
-                    for i3,end_key in enumerate(key_row_2):
+                for key_row_2 in keypad:
+                    for end_key in key_row_2:
                         if end_key:
                             if start_key==end_key:
                                 movement_dict[start_key+start_key]=[(0,'')]
                             else:
                                 visited={(i0,i1)}
-                                run=True
                                 queue=[((i0,i1),start_key,'')]
                                 paths=[]
-                                while run:
+                                while True:
                                     try:
                                         position,key,path_str=queue.pop(0)
-                                    except: #if all adjacent valid keys have been visited
+                                    except: #if all valid keys have been visited
                                         break
                                     if key!=end_key:
                                         visited.add(position)
@@ -57,7 +56,6 @@ def get_movement_dict(keypad):
                                         if len(paths)==0:
                                             path_length_to_match=len(path_str)
                                         if len(path_str)==path_length_to_match:
-                                            # paths.append(path_str)
                                             change_sum=0
                                             last_key=path_str[0]
                                             try:
@@ -81,293 +79,271 @@ def get_movement_dict(keypad):
 numeric_dict=get_movement_dict(keypad_numeric)
 directional_dict=get_movement_dict(keypad_directional)
 
-# complexity_sum=0
-# for code_ in codes:
-#     code='A'+code_
-#     directional_input='A'
-#     for i in range(4):
-#         move=code[i]+code[i+1]
-#         directional_input+=numeric_dict[move][0][1]+'A'
-#         # print(numeric_dict[move][0]+'A',move,numeric_dict[move])
-#         #02>^^AvvvA, 02^>^AvvvA, and 02^^>AvvvA, 029A
-#     # print(directional_input in ['<A^A>^^AvvvA','<A^A^>^AvvvA','<A^A^^>AvvvA'])
-#     directional_input_2='A'
-#     for i in range(len(directional_input)-1):
-#         move=directional_input[i]+directional_input[i+1]
-#         directional_input_2+=directional_dict[move][0][1]+'A'
-#     # print(len(directional_input_2)-1,len('v<<A>>^A<A>AvA<^AA>A<vAAA>^A'))
-
-#     # directional_input_2='Av<<A>>^A<A>AvA<^AA>A<vAAA>^A'
-#     directional_input_3='A'
-#     for i in range(len(directional_input_2)-1):
-#         move=directional_input_2[i]+directional_input_2[i+1]
-#         directional_input_3+=directional_dict[move][0][1]+'A'
-#     # print(len(directional_input_3)-1,len('<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'))
-#     complexity_sum+=(len(directional_input_3)-1)*int(code_.strip('0').strip('A'))
-#     # print(code_,len(directional_input_3)-1,int(code_.strip('0').strip('A')))
-# print(complexity_sum)
-# #68 * 29, 60 * 980, 68 * 179, 64 * 456, and 64 * 379
-
-
-
-
-
-
-
-def get_paths(possible_paths,move_dict,move):
-    new_paths=[]
-    minimum_moves=move_dict[move][0][0]
-    while possible_paths:
-        change_sum,move_str,last_move=possible_paths.pop()
-        for moves_,path_ in move_dict[move]:
-            if moves_==minimum_moves:
-                if path_=='':
-                    change=0
-                    last_move=''
-                else:                    
-                    if path_[0]==last_move:
-                        change=0
-                    else:
-                        change=1
-                    last_move=path_[-1]
-                new_paths.append((change_sum+change,move_str+path_+'A',last_move))
-    return new_paths
 def get_paths_2(possible_paths,move_dict,move):
     new_paths=[]
     minimum_moves=move_dict[move][0][0]
     while possible_paths:
-        move_str=possible_paths.pop()
+        move_str=possible_paths.pop(0)
         for moves_,path_ in move_dict[move]:
             if moves_==minimum_moves:
                 new_paths.append(move_str+path_+'A')
     return new_paths
 
-def get_dict_paths(possible_paths,move_dict,move):
-    new_paths=[]
-    minimum_moves=move_dict[move][0][0]
-    while possible_paths:
-        _,move_str=possible_paths.pop()
-        for moves_,path_ in move_dict[move]:
-            if moves_==minimum_moves:
-                new_move_str=move_str+path_+'A'
-                insort(new_paths,(len(new_move_str),new_move_str))
-    return new_paths
-
-# d2=dict()
-# for move_0,paths in numeric_dict.items():
-#     possible_paths=paths+[]
-#     min_steps=paths[0][0]
-#     while possible_paths:
-#         steps,directional_input=possible_paths.pop()
-#         if directional_input=='':
-#                 d2[move_0]=[(0,'')]
-#         else:
-#             if steps==min_steps:
-#                 for i in range(len(directional_input)-1):
-#                     move=directional_input[i]+directional_input[i+1]
-#                     new_paths=get_dict_paths(['A'],directional_dict,move)
-#                 try:
-#                     insort(d2[move_0],new_paths)
-#                 except:
-#                     d2[move_0]=new_paths
-1
-# d2=dict()
-# for move_d2,paths in numeric_dict.items():
-#     new_paths=get_dict_paths(paths+[],directional_dict,move)
-#     try:
-#         insort(d2[move],new_paths)
-#     except:
-#         d2[move]=new_paths
-
-#nytt test
-
-keys=['<','>','^','v','A']
-combos=[]
-combos_dict=dict()
-for k1 in keys:
-    for k2 in keys:
-        for k3 in keys:
-            combos.append(k1+k2+k3)
-            paths=directional_dict[k1+k2]
-
-move_dict=dict()
-loop_dict=directional_dict
-for _ in range(1):
-    for move_0,path in loop_dict.items():
-        for _,path_str in path:
-            if path_str=='':
-                move_dict[move_0]=[(0,'')]
-            else:
-                # directional_input='A'+path_str+'A'
-                directional_input=''+path_str+'A'
-                possible_paths_iter=['A']
-                for i in range(len(directional_input)-1):
-                    move=directional_input[i]+directional_input[i+1]
-                    possible_paths_iter=get_paths_2(possible_paths_iter,directional_dict,move)
-                if len(possible_paths_iter)>1:
-                    Ns=[]
-                    changes=[]
-                    for ppi in possible_paths_iter:
-                        last_ch=ppi[0]
-                        change=0
-                        for ch in ppi[1:]:
-                            if ch!=last_ch:
-                                change+=1
-                            last_ch=ch
-                        changes.append(change)
-                        Ns.append(len(ppi))
-                    print(Ns,changes)
-                1
-                move_dict[move_0]=[(len(x),x) for x in possible_paths_iter]
-    loop_dict=move_dict
-
-complexity_sum_=0
-for code_ in codes:
-    code='A'+code_
-    possible_paths=['A']
-    for i in range(4):
-        move=code[i]+code[i+1]
-        possible_paths=get_paths_2(possible_paths,numeric_dict,move)
-
-    all_possible_paths=[x for x in possible_paths]
-    all_possible_paths_=[]
-    while all_possible_paths:
-        # _,directional_input,_=all_possible_paths.pop()
-        # all_possible_paths_iter=[(0,'A','')]
-        # for i in range(len(directional_input)-1):
-        #     move=directional_input[i]+directional_input[i+1]
-        #     all_possible_paths_iter=get_paths(all_possible_paths_iter,directional_dict,move)
-        directional_input=all_possible_paths.pop()
-        all_possible_paths_iter=['A']
-        for i in range(len(directional_input)-1):
-            move=directional_input[i]+directional_input[i+1]
-            all_possible_paths_iter=get_paths_2(all_possible_paths_iter,move_dict,move)
-        all_possible_paths_+=all_possible_paths_iter
-    cs=[]
-    L=[]
-    for p in all_possible_paths_:
-        # cs.append(len(p[1][1:])*int(code_.strip('0').strip('A')))
-        cs.append(len(p[1:])*int(code_.strip('0').strip('A')))
-        L.append(len(p))
-    print(min(L),max(L))
-    complexity_sum_+=min(cs)
-print(complexity_sum_)
-
-
-#om ej får enklare idé, jfr typ A0 då loopar som nedan som ger rätt svar å m dict här ovan
-#kan även testa mappa ex 01 å hitta minimumväg för 1 iteration, se om är minimum efter 2, 3 iterationer...
-
-####
-
-
-
-complexity_sum=0
-complexity_sum_2=0
 complexity_sum_3=0
 for code_ in codes:
     code='A'+code_
-
-
-
-
     possible_paths=['A']
     for i in range(4):
         move=code[i]+code[i+1]
         possible_paths=get_paths_2(possible_paths,numeric_dict,move)
-
-
-
-
-    # possible_paths=[(0,'A','')]
-    # for i in range(4):
-    #     move=code[i]+code[i+1]
-    #     possible_paths=get_paths(possible_paths,numeric_dict,move)
-    possible_paths=['A']
-    for i in range(4):
-        move=code[i]+code[i+1]
-        possible_paths=get_paths_2(possible_paths,numeric_dict,move)
-
-    # all_possible_paths=[x for x in possible_paths]
-    # all_possible_paths_=[]
-    # while all_possible_paths:
-    #     directional_input=all_possible_paths.pop()
-    #     all_possible_paths_iter=['A']
-    #     for i in range(len(directional_input)-1):
-    #         move=directional_input[i]+directional_input[i+1]
-    #         all_possible_paths_iter=get_paths_2(all_possible_paths_iter,d2,move)
-    #     all_possible_paths_+=all_possible_paths_iter
-    # cs=[]
-    # L=[]
-    # for p in all_possible_paths_:
-    #     # cs.append(len(p[1][1:])*int(code_.strip('0').strip('A')))
-    #     cs.append(len(p[1:])*int(code_.strip('0').strip('A')))
-    #     L.append(len(p))
-    # print(min(L),max(L))
-    # complexity_sum_2+=min(cs)
-
-
-    #kolla om path som är kortast efter iteration 2 var kortast i iteration 1
-    #hitta den som håller sig kortast, mappa om dess moves flera ggr?
-    #kan räkna hur många olika av varje move/tecken har före och efter och öka dessa m iterationer?
     all_possible_paths=[x for x in possible_paths]
+    it_dicts=[]
     for _ in range(2):
         all_possible_paths_=[]
+        it_dict=dict()
         while all_possible_paths:
-            # _,directional_input,_=all_possible_paths.pop()
-            # all_possible_paths_iter=[(0,'A','')]
-            # for i in range(len(directional_input)-1):
-            #     move=directional_input[i]+directional_input[i+1]
-            #     all_possible_paths_iter=get_paths(all_possible_paths_iter,directional_dict,move)
-            directional_input=all_possible_paths.pop()
+            directional_input=all_possible_paths.pop(0)
             all_possible_paths_iter=['A']
             for i in range(len(directional_input)-1):
                 move=directional_input[i]+directional_input[i+1]
                 all_possible_paths_iter=get_paths_2(all_possible_paths_iter,directional_dict,move)
             all_possible_paths_+=all_possible_paths_iter
+            it_dict[directional_input]=all_possible_paths_iter
         all_possible_paths=all_possible_paths_
+        it_dicts.append(it_dict)
     cs=[]
     L=[]
     for p in all_possible_paths:
-        # cs.append(len(p[1][1:])*int(code_.strip('0').strip('A')))
         cs.append(len(p[1:])*int(code_.strip('0').strip('A')))
         L.append(len(p))
-    print(min(L),max(L))
     complexity_sum_3+=min(cs)
-    # print(complexity_sum_3)
-    1
-    # all_possible_paths_2=[]
-    # while possible_paths:
-    #     _,directional_input,_=possible_paths.pop()
-    #     possible_paths_2_=[(0,'A','')]
-    #     for i in range(len(directional_input)-1):
-    #         move=directional_input[i]+directional_input[i+1]
-    #         possible_paths_2_=get_paths(possible_paths_2_,directional_dict,move)
-    #     all_possible_paths_2+=possible_paths_2_
-
-    # all_possible_paths_3=[]
-    # while all_possible_paths_2:
-    #     _,directional_input,_=all_possible_paths_2.pop()
-    #     possible_paths_3=[(0,'A','')]
-    #     for i in range(len(directional_input)-1):
-    #         move=directional_input[i]+directional_input[i+1]
-    #         possible_paths_3=get_paths(possible_paths_3,directional_dict,move)
-    #     all_possible_paths_3+=possible_paths_3
-    # cs=[]
-    # for p in all_possible_paths_3:
-    #     cs.append(len(p[1][1:])*int(code_.strip('0').strip('A')))
-    # complexity_sum_3+=min(cs)
-
 print(complexity_sum_3)
 
 
+#part 2
+def count_dict_to_character_count(count_dict):
+    charachter_count=0
+    for A_str_iter,count_iter in count_dict.items():
+        charachter_count+=count_iter*(len(A_str_iter)-1)
+    return charachter_count
+
+# #verification of correct characters when propagating dictionary representation of movement strings
+# def get_next_Astr(A_str,move_dict):
+#     new_move_str=''
+#     for i in range(len(A_str)-1):
+#         new_move_str+=move_dict[A_str[i:i+1+1]][0][1]+'A'
+#     return 'A'+new_move_str
+# A_str_start=possible_paths[0]
+# A_str_=A_str_start
+# count_dict_iter=get_count_dict(A_str_start)
+# for ii in range(10):
+#     count_dict_iter=iterate_count_dict(count_dict_iter)
+#     A_str_=get_next_Astr(A_str_,directional_dict)
+#     count_dict_ref=get_count_dict(A_str_)
+#     print(ii,count_dict_iter==count_dict_ref,len(A_str_[1:]),count_dict_to_character_count(count_dict_iter))
+
+#ny spawned_dict
+directional_dict.keys()
+spawn_Adelimited_move_strs_dict_3=dict()
+loop_queue=[]
+for numeric_move,move_list in numeric_dict.items():
+    for _,move_str in move_list:
+        if move_str=='':
+            new_move_strs=['A']
+        else:
+            move_str_=f"A{move_str}"
+            new_move_strs=['']
+            for i in range(len(move_str_)-1):
+                variations=directional_dict[move_str_[i:i+1+1]]                
+                temp=[]
+                while new_move_strs:
+                    new_move_str_0=new_move_strs.pop(0)
+                    for _,variation in variations:
+                        temp.append(new_move_str_0+variation+'A')
+                new_move_strs=temp
+        for new_move_str in new_move_strs:
+            spawned_Adelimited_move_strs=new_move_str.split('A')[:-1]
+            for _str in spawned_Adelimited_move_strs+[move_str]:
+                A_str=f"A{_str}A"
+                if A_str not in spawn_Adelimited_move_strs_dict_3:
+                    spawn_Adelimited_move_strs_dict_3[A_str]=set()
+                    loop_queue.append(A_str)
+
+while loop_queue:
+    A_str=loop_queue.pop(0)
+    new_move_strs=['']
+    for i in range(len(A_str)-1):
+        variations=directional_dict[A_str[i:i+1+1]]                
+        temp=[]
+        while new_move_strs:
+            new_move_str_0=new_move_strs.pop(0)
+            for _,variation in variations:
+                temp.append(new_move_str_0+variation+'A')
+        new_move_strs=temp
+
+    for new_move_str in new_move_strs:
+        spawned_Adelimited_move_strs=new_move_str.split('A')[:-1]
+        spawned_Astrs=[]
+        for _str in spawned_Adelimited_move_strs:
+            A_str_=f"A{_str}A"
+            spawned_Astrs.append(A_str_)
+            if A_str_ not in spawn_Adelimited_move_strs_dict_3:
+                spawn_Adelimited_move_strs_dict_3[A_str_]=set()
+                loop_queue.append(A_str_)
+        spawn_Adelimited_move_strs_dict_3[A_str].add(tuple(sorted(spawned_Astrs)))
+
+def get_count_dict_2(check_str):
+    count_dict=dict()
+    for _str in check_str.split('A')[1:-1]:
+        A_str=f"A{_str}A"
+        try:
+            count_dict[A_str]+=1
+        except:
+            count_dict[A_str]=1
+    return count_dict
+def iterate_count_dict_2(count_dict,spawn_dict,step_dict):
+    iterated_count_dicts=[dict()]
+    for A_str,count in count_dict.items():
+        new_iterated_count_dicts=[]
+        spawn_variant_counts=[]
+        spawn_changes_sums=[]
+        while iterated_count_dicts:
+            previous_iterated_count_dict=iterated_count_dicts.pop(0)            
+            for spawn_distribution in spawn_dict[A_str]:
+                iterated_count_dict={key:value for key,value in previous_iterated_count_dict.items()}
+                iterated_count_dict=dict()
+                spawn_variant_count=0
+                spawn_changes_sum=0
+                for key,value in previous_iterated_count_dict.items():
+                    iterated_count_dict[key]=value
+                    spawn_variant_count+=value*(len(key)-1)
+                for A_str_spawned in spawn_distribution:
+                    try:
+                        iterated_count_dict[A_str_spawned]+=count
+                    except:
+                        iterated_count_dict[A_str_spawned]=count
+                    spawn_variant_count+=(len(A_str_spawned)-1)*count
+                    ch_o=A_str_spawned[0]
+                    for ch in A_str_spawned[1:]:
+                        spawn_changes_sum+=step_dict[ch_o+ch]
+                        ch_o=ch
+                new_iterated_count_dicts.append(iterated_count_dict)
+                spawn_variant_counts.append(spawn_variant_count)
+                spawn_changes_sums.append(spawn_changes_sum)
+        iterated_count_dicts=new_iterated_count_dicts
+    return iterated_count_dicts,spawn_variant_counts,spawn_changes_sums
+
+possible_paths=['A']
+for i in range(4):
+    move=code[i]+code[i+1]
+    possible_paths=get_paths_2(possible_paths,numeric_dict,move)
+A_str_code=possible_paths[0]
+_str_blocks=A_str_code.split('A')[1:-1]
+for _str_block in _str_blocks:
+    A_str_block=f"A{_str_block}A"
+A_str_count_dict=get_count_dict_2(A_str_block)
+
+directional_step_dict={key:len(info[1]) for key,value in directional_dict.items() for info in value}
 
 
+def A_str_iter_min(A_str,N_iter,spawn_dict):
+    iterated_count_dicts_0=[get_count_dict_2(A_str)]
+    if N_iter<=2:
+        for _ in range(N_iter):
+            min_spawn_variant_counts=[]
+            while iterated_count_dicts_0:
+                _count_dict=iterated_count_dicts_0.pop(0)
+                iterated_count_dicts,spawn_variant_counts,_=iterate_count_dict_2(_count_dict,spawn_dict,directional_step_dict)
+                min_spawn_variant_counts.append(min(spawn_variant_counts))
+            iterated_count_dicts_0=iterated_count_dicts
+    else:
+        for _ in range(N_iter):
+            min_spawn_variant_counts=[]
+            next_iterated_count_dicts=[]
+            while iterated_count_dicts_0:
+                _count_dict=iterated_count_dicts_0.pop(0)
+                iterated_count_dicts,spawn_variant_counts,_=iterate_count_dict_2(_count_dict,spawn_dict,directional_step_dict)
+                min_spawn_variant_counts.append(min(spawn_variant_counts))
+                next_iterated_count_dicts+=iterated_count_dicts
+            iterated_count_dicts_0=next_iterated_count_dicts
+    current_min=min(min_spawn_variant_counts)
+    return current_min
+
+def iterate_count_dict_first_grab(count_dict,spawn_dict):
+    iterated_count_dict=dict()
+    for A_str,count in count_dict.items():
+        if count>0:
+            next_pick=spawn_dict[A_str][0]
+            for A_str_spawned in next_pick:
+                try:
+                    iterated_count_dict[A_str_spawned]+=count
+                except:
+                    iterated_count_dict[A_str_spawned]=count
+    return iterated_count_dict
+
+def filter_spawn_dict(spawn_Adelimited_move_strs_dict_to_filter,spawn_Adelimited_move_strs_dict,N_iter):
+    spawn_Adelimited_move_strs_dict_3_filtered=dict()
+    next_iteration_dict=dict()
+    for A_str_key,A_str_spawn_variations in spawn_Adelimited_move_strs_dict_to_filter.items():
+        if len(A_str_spawn_variations)>1:
+            spawns_dict=dict()      
+            min_spawns_value=10**18
+            for spawns in A_str_spawn_variations:
+                actual_A_str='A'
+                for _A_str in spawns:
+                    actual_A_str+=_A_str[1:]
+                current_min=A_str_iter_min(actual_A_str,N_iter,spawn_Adelimited_move_strs_dict)
+                min_spawns_value=min([min_spawns_value,current_min])
+                try:
+                    spawns_dict[current_min].append(spawns)
+                except:
+                    spawns_dict[current_min]=[spawns]
+            spawn_Adelimited_move_strs_dict_3_filtered[A_str_key]=spawns_dict[min_spawns_value]
+            if len(spawns_dict[min_spawns_value])>1:
+                next_iteration_dict[A_str_key]=spawns_dict[min_spawns_value]
+        else:
+            spawn_Adelimited_move_strs_dict_3_filtered[A_str_key]=A_str_spawn_variations
+    for A_str_key,A_str_spawn_variations in  spawn_Adelimited_move_strs_dict.items():
+        if A_str_key not in spawn_Adelimited_move_strs_dict_3_filtered:
+            spawn_Adelimited_move_strs_dict_3_filtered[A_str_key]=A_str_spawn_variations
+    return spawn_Adelimited_move_strs_dict_3_filtered,next_iteration_dict
+
+for key,value in spawn_Adelimited_move_strs_dict_3.items():
+    spawn_Adelimited_move_strs_dict_3[key]=list(value)
+N_iter=1
+left_to_filter=spawn_Adelimited_move_strs_dict_3
+filtered_spawn_dict=spawn_Adelimited_move_strs_dict_3
+while True:
+    filtered_spawn_dict,left_to_filter=filter_spawn_dict(left_to_filter,filtered_spawn_dict,N_iter)
+    if len(left_to_filter)==0:
+        break
+    N_iter+=1
 
 
-
-
-
-
-
-#161472 too high
-#162784
+1
+complexity_sum_1=0
+complexity_sum_2=0
+for code_ in codes:
+    code='A'+code_
+    numeric_keypad_paths=['A']
+    for i in range(4):
+        move=code[i]+code[i+1] #move=from a key to the following key
+        numeric_keypad_paths=get_paths_2(numeric_keypad_paths,numeric_dict,move) #return all different shortest paths between the keys specified in the move above, if new options appear all previous paths are prepended to these new options and all the resulting paths are returned
+    min_iter_count=10**18
+    sum_1_counts=[] #counts of path lengths after 2 iterations for the different numeric keypads from above, the minimum value will be used to calculate the complexity sum
+    for key_path in numeric_keypad_paths:
+        key_path_count_dict=get_count_dict_2(key_path) #convert the key path to a dictionary with key=A-strings and values=count of how many times the A-strings appear in the key path
+        for iter in range(25): #run one loop to cover both part 1 and part 2
+            # key_path_count_dict=iterate_count_dict_first_grab(key_path_count_dict,spawn_Adelimited_move_strs_dict_3_filtered_2)
+            key_path_count_dict=iterate_count_dict_first_grab(key_path_count_dict,filtered_spawn_dict)
+            if iter==1: #part 1 only has 2 iterations
+                iter_count=count_dict_to_character_count(key_path_count_dict)
+                sum_1_counts.append(iter_count)
+        iter_count=count_dict_to_character_count(key_path_count_dict)
+        if iter_count<min_iter_count:
+            min_iter_count=iter_count
+    code_integer=int(code_.strip('0').strip('A'))
+    complexity_sum_1+=min(sum_1_counts)*code_integer
+    complexity_sum_2+=min_iter_count*code_integer
+print('1st:',complexity_sum_1,complexity_sum_1==157908)
+print('2nd:',complexity_sum_2,complexity_sum_2==196910339808654)
