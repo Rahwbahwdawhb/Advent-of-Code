@@ -328,4 +328,4 @@ for code_ in codes:
     complexity_sum_1+=min(sum_1_counts)*code_integer
     complexity_sum_2+=min_iter_count*code_integer
 print('1st:',complexity_sum_1)
-print('2nd:',complexity_sum_2)
+print('2nd:',complexity_sum_2) 
