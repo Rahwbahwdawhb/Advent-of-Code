@@ -6,6 +6,19 @@ file='input.txt'
 with open(file) as f:
     codes=f.read().strip().split('\n')
 
+#stuff that I found made the problem tricky:
+#*it was a bit involved (not too hard but fiddly) to set up set up dictionaries for movement on numeric and directional keypads
+#*the differences between key combinations that had the same path lengths and gave the same path lengths for one iteration would start diverging after several iterations
+# this made it difficult to remove them in a simple way for part 2
+#*the shortest path for multiple iterations might result from a string that did not necesserily give the shortest path for a lower number of iterations (from the numeric keypad dict)
+
+#initially looked at number of direction changes to differentiate propagation strings, but the importance was how many more keys those direction changes (different moves) those moves resulted in after several iterations
+#-it was better to track number characters in future strings after several iterations to differentiate
+#-to come to the solution, it was helpful to check how strings from the numeric dict evolved after the 2 first iterations
+#--first to see the difference that equal length strings could result in after some iterations, especially with different possible variants (hinted about the need of filtering them)
+#--second to use for verification when propagating count_dicts
+
+
 def get_movement_dict(keypad):
     #take list of lists inputs where each "inner" list corresponds to keys on a row, topmost row comes first
     #return dictionary with keys=move from one key to another, values=shortest paths to go between those keys
@@ -186,7 +199,7 @@ while loop_queue:
             for _,variation in variations:
                 temp.append(new_move_str_0+variation+'A')
         new_move_strs=temp
-    #go through allt the move-strings from above and split them into A_strs
+    #go through all the move-strings from above and split them into A_strs
     for new_move_str in new_move_strs:
         spawned_str_snippets=new_move_str.split('A')[:-1]
         spawned_Astrs=[]
@@ -198,69 +211,53 @@ while loop_queue:
                 loop_queue.append(A_str_)
         A_str_spawn_dict[A_str].add(tuple(sorted(spawned_Astrs))) #turn the A_strs from one variation into a tuple and sort it so that it can uniquely be added to a set to avoid duplicates
 
-def iterate_count_dict_2(count_dict,spawn_dict,step_dict):
+for key,value in A_str_spawn_dict.items(): #turn the A_str_spawn_dict value to lists instead of sets for easier future handling
+    A_str_spawn_dict[key]=list(value)
+
+def iterate_count_dict(count_dict,spawn_dict):
     iterated_count_dicts=[dict()]
+    #loop through the input count_dict (its A_strs and their counts) and create new count_dicts that has the same counts for those A_strs +the counts (and possibly new A_str) that they key-A_strs in input count_dict generate after a new iteration (look up which A_strs that are generated for each key-A_str in the spawn_dict)
     for A_str,count in count_dict.items():
-        new_iterated_count_dicts=[]
-        spawn_variant_counts=[]
-        spawn_changes_sums=[]
+        new_iterated_count_dicts=[] #holds all count_dicts generated from the different variants supported by each A_str-key in the spawn_dict
+        spawn_variant_counts=[] #holds the corresponding character counts, i.e. sum of A_str-length (-1 to avoid excess A:s) multiplied by number of occurences for each count_dict variant
         while iterated_count_dicts:
             previous_iterated_count_dict=iterated_count_dicts.pop(0)            
             for spawn_distribution in spawn_dict[A_str]:
-                iterated_count_dict={key:value for key,value in previous_iterated_count_dict.items()}
                 iterated_count_dict=dict()
                 spawn_variant_count=0
-                spawn_changes_sum=0
-                for key,value in previous_iterated_count_dict.items():
+                for key,value in previous_iterated_count_dict.items(): #initiates the count_dict and its character count from previous iterations, that new spawned A_strs will be added to due to the key-A_str spawn_dict[A_str]
                     iterated_count_dict[key]=value
                     spawn_variant_count+=value*(len(key)-1)
-                for A_str_spawned in spawn_distribution:
+                for A_str_spawned in spawn_distribution: #go through each spawned A_str and add its count to the initiated count_dict and the corresponding character count to its count-tally
                     try:
                         iterated_count_dict[A_str_spawned]+=count
                     except:
                         iterated_count_dict[A_str_spawned]=count
                     spawn_variant_count+=(len(A_str_spawned)-1)*count
-                    ch_o=A_str_spawned[0]
-                    for ch in A_str_spawned[1:]:
-                        spawn_changes_sum+=step_dict[ch_o+ch]
-                        ch_o=ch
-                new_iterated_count_dicts.append(iterated_count_dict)
-                spawn_variant_counts.append(spawn_variant_count)
-                spawn_changes_sums.append(spawn_changes_sum)
+                new_iterated_count_dicts.append(iterated_count_dict) #add the updated (new counts added to it through above loop) to a list that holds the count_dict variants from the latest iteration
+                spawn_variant_counts.append(spawn_variant_count) #add latest character counts to similar list
         iterated_count_dicts=new_iterated_count_dicts
-    return iterated_count_dicts,spawn_variant_counts,spawn_changes_sums
+    return iterated_count_dicts,spawn_variant_counts #return the last iterated count_dicts and the corresponding character counts
 
-directional_step_dict={key:len(info[1]) for key,value in directional_dict.items() for info in value}
-
-
-def A_str_iter_min(A_str,N_iter,spawn_dict):
-    iterated_count_dicts_0=[get_count_dict(A_str)]
-    if N_iter<=2:
-        for _ in range(N_iter):
-            min_spawn_variant_counts=[]
-            while iterated_count_dicts_0:
-                _count_dict=iterated_count_dicts_0.pop(0)
-                iterated_count_dicts,spawn_variant_counts,_=iterate_count_dict_2(_count_dict,spawn_dict,directional_step_dict)
-                min_spawn_variant_counts.append(min(spawn_variant_counts))
-            iterated_count_dicts_0=iterated_count_dicts
-    else:
-        for _ in range(N_iter):
-            min_spawn_variant_counts=[]
-            next_iterated_count_dicts=[]
-            while iterated_count_dicts_0:
-                _count_dict=iterated_count_dicts_0.pop(0)
-                iterated_count_dicts,spawn_variant_counts,_=iterate_count_dict_2(_count_dict,spawn_dict,directional_step_dict)
-                min_spawn_variant_counts.append(min(spawn_variant_counts))
-                next_iterated_count_dicts+=iterated_count_dicts
-            iterated_count_dicts_0=next_iterated_count_dicts
+def A_str_iter_min(A_str,N_iter,spawn_dict): #return the least number of spawn_variants that A_str will generate after an iteration through spawn_dict
+    iterated_count_dicts_0=[get_count_dict(A_str)] #A_str=>count_dict to iterate
+    for _ in range(N_iter):
+        min_spawn_variant_counts=[]
+        next_iterated_count_dicts=[]
+        while iterated_count_dicts_0:
+            _count_dict=iterated_count_dicts_0.pop(0)
+            iterated_count_dicts,spawn_variant_counts=iterate_count_dict(_count_dict,spawn_dict)
+            min_spawn_variant_counts.append(min(spawn_variant_counts))
+            next_iterated_count_dicts+=iterated_count_dicts
+        iterated_count_dicts_0=next_iterated_count_dicts
     current_min=min(min_spawn_variant_counts)
     return current_min
 
-def iterate_count_dict_first_grab(count_dict,spawn_dict):
+def filtered_count_dict_iterate(count_dict,filtered_spawn_dict): #will grab the 1st entry in the spawn_dict and use to iterate A_strs, thus only suitable after filtering the spawn_dict to only have 1 entry for each A_str!
     iterated_count_dict=dict()
     for A_str,count in count_dict.items():
         if count>0:
-            next_pick=spawn_dict[A_str][0]
+            next_pick=filtered_spawn_dict[A_str][0]
             for A_str_spawned in next_pick:
                 try:
                     iterated_count_dict[A_str_spawned]+=count
@@ -268,38 +265,39 @@ def iterate_count_dict_first_grab(count_dict,spawn_dict):
                     iterated_count_dict[A_str_spawned]=count
     return iterated_count_dict
 
-def filter_spawn_dict(spawn_Adelimited_move_strs_dict_to_filter,spawn_Adelimited_move_strs_dict,N_iter):
+#probably the most important function for this implementation of part 2 to work
+def filter_spawn_dict(spawn_dict_to_filter,spawn_dict,N_iter):
     A_str_spawn_dict_filtered=dict()
     next_iteration_dict=dict()
-    for A_str_key,A_str_spawn_variations in spawn_Adelimited_move_strs_dict_to_filter.items():
+    for A_str_key,A_str_spawn_variations in spawn_dict_to_filter.items():
         if len(A_str_spawn_variations)>1:
             spawns_dict=dict()      
             min_spawns_value=10**18
             for spawns in A_str_spawn_variations:
                 actual_A_str='A'
-                for _A_str in spawns:
+                for _A_str in spawns: #concatenate A_strs that the current spawn has into one A_str (removing overlapping A:s)
                     actual_A_str+=_A_str[1:]
-                current_min=A_str_iter_min(actual_A_str,N_iter,spawn_Adelimited_move_strs_dict)
+                #check minimum spawns that can be generated from the concatenated A_str and store the spawns in a dictionary with keys=least number of future spawns and values=spawns
+                current_min=A_str_iter_min(actual_A_str,N_iter,spawn_dict)
                 min_spawns_value=min([min_spawns_value,current_min])
                 try:
                     spawns_dict[current_min].append(spawns)
                 except:
                     spawns_dict[current_min]=[spawns]
-            A_str_spawn_dict_filtered[A_str_key]=spawns_dict[min_spawns_value]
-            if len(spawns_dict[min_spawns_value])>1:
+            A_str_spawn_dict_filtered[A_str_key]=spawns_dict[min_spawns_value] #save the spawns that generated the fewest future spawns in the filtered dict
+            if len(spawns_dict[min_spawns_value])>1: #if the current filter has more than 1 possible variant, put it in a dictionary that will be used for future filtering
                 next_iteration_dict[A_str_key]=spawns_dict[min_spawns_value]
-        else:
-            A_str_spawn_dict_filtered[A_str_key]=A_str_spawn_variations
-    for A_str_key,A_str_spawn_variations in  spawn_Adelimited_move_strs_dict.items():
+    for A_str_key,A_str_spawn_variations in  spawn_dict.items(): #Add A_str-keys that are already filtered down to have 1 variant to the filtered dict
         if A_str_key not in A_str_spawn_dict_filtered:
             A_str_spawn_dict_filtered[A_str_key]=A_str_spawn_variations
     return A_str_spawn_dict_filtered,next_iteration_dict
 
-for key,value in A_str_spawn_dict.items():
-    A_str_spawn_dict[key]=list(value)
-N_iter=1
+#filter A_str_spawn_dict
+N_iter=1 #number of iterations to use for first filtering
 left_to_filter=A_str_spawn_dict
 filtered_spawn_dict=A_str_spawn_dict
+#keep filtering until all A_str_spawn_dict values are lists with 1 entry, this is when the left_fo_filter dict has a length of 0
+#when first solving it I manually filtered it in this manner by trying different values for N_iter
 while True:
     filtered_spawn_dict,left_to_filter=filter_spawn_dict(left_to_filter,filtered_spawn_dict,N_iter)
     if len(left_to_filter)==0:
@@ -319,8 +317,7 @@ for code_ in codes:
     for key_path in numeric_keypad_paths:
         key_path_count_dict=get_count_dict(key_path) #convert the key path to a dictionary with key=A-strings and values=count of how many times the A-strings appear in the key path
         for iter in range(25): #run one loop to cover both part 1 and part 2
-            # key_path_count_dict=iterate_count_dict_first_grab(key_path_count_dict,A_str_spawn_dict_filtered_2)
-            key_path_count_dict=iterate_count_dict_first_grab(key_path_count_dict,filtered_spawn_dict)
+            key_path_count_dict=filtered_count_dict_iterate(key_path_count_dict,filtered_spawn_dict)
             if iter==1: #part 1 only has 2 iterations
                 iter_count=count_dict_to_character_count(key_path_count_dict)
                 sum_1_counts.append(iter_count)
