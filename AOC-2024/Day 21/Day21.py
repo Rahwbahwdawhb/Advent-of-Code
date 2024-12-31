@@ -327,5 +327,5 @@ for code_ in codes:
     code_integer=int(code_.strip('0').strip('A'))
     complexity_sum_1+=min(sum_1_counts)*code_integer
     complexity_sum_2+=min_iter_count*code_integer
-print('1st:',complexity_sum_1,complexity_sum_1==157908)
-print('2nd:',complexity_sum_2,complexity_sum_2==196910339808654)
+print('1st:',complexity_sum_1)
+print('2nd:',complexity_sum_2)
