@@ -25,8 +25,6 @@ for position in positions_1:
         positions_2.remove(position)
 print("1st:",reachable_count)
 
-from time import time
-t0=time()
 can_be_removed_count=reachable_count
 to_be_removed=[]
 while True:
@@ -46,4 +44,3 @@ while True:
         positions_2.remove(position)
         can_be_removed_count+=1
 print("2nd:",can_be_removed_count)
-print(time()-t0)
