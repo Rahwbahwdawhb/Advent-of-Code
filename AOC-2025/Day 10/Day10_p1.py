@@ -38,23 +38,13 @@ for indicator_diagram in indicator_diagrams:
     buttons_,joltage_requirements=rest.split('{')
     joltage_requirements=np.array([int(jr) for jr in joltage_requirements[:-1].split(',')])
     N=len(lights)
+    buttons=[{int(b_) for b_ in b.strip('()').split(',')} for b in buttons_.strip().split(' ')] #used for part 1
 
     if solve_1: #to be optimized, super slow but works
         to_toggle_set=set()
         for i,(gl,l) in enumerate(zip(goal_lights,lights)):
             if gl!=l:
                 to_toggle_set.add(i)
-        buttons=[]
-        for b_ in buttons_.strip().split(' '):
-            b=set()
-            in_toggle_set=0
-            for t in b_.strip('()').split(','):
-                t=int(t)
-                b.add(t)
-                if t in to_toggle_set:
-                    in_toggle_set+=1
-            if in_toggle_set>0:
-                buttons.append(b)
         from_prior_iteration=[(None,None,to_toggle_set,lights)]
 
         found_toggle_sequence=False
